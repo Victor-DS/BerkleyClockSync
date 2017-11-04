@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sincronizaçãorelogios;
+package berklery.clock.sync.victor.santiago;
 
-import sincronizaçãorelogios.utils.DateUtils;
+import berklery.clock.sync.victor.santiago.utils.DateUtils;
 
 /**
  * Global configurations.

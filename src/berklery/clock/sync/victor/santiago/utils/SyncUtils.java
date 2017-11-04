@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sincronizaçãorelogios.utils;
+package berklery.clock.sync.victor.santiago.utils;
 
-import sincronizaçãorelogios.Config;
+import berklery.clock.sync.victor.santiago.Config;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

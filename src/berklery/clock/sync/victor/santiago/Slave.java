@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sincronizaçãorelogios;
+package berklery.clock.sync.victor.santiago;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import sincronizaçãorelogios.utils.Command;
-import sincronizaçãorelogios.utils.DateUtils;
-import sincronizaçãorelogios.utils.SyncUtils;
+
+import berklery.clock.sync.victor.santiago.utils.Command;
+import berklery.clock.sync.victor.santiago.utils.DateUtils;
+import berklery.clock.sync.victor.santiago.utils.SyncUtils;
 
 /**
  * Slave which sends

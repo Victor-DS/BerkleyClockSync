@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sincronizaçãorelogios.model;
+package berklery.clock.sync.victor.santiago.model;
 
 import java.util.Date;
 import java.util.List;
-import sincronizaçãorelogios.utils.DateUtils;
+
+import berklery.clock.sync.victor.santiago.utils.DateUtils;
 
 /**
  * Handles all Berkley-related algorithm calculations.

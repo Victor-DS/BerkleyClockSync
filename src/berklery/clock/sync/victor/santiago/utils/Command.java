@@ -21,31 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sincronizaçãorelogios.model;
-
-import java.net.InetAddress;
+package berklery.clock.sync.victor.santiago.utils;
 
 /**
- * Object to keep track of a Slave's data.
+ * List of String commands used by the master and slave.
  *
  * @author Victor Santiago
  */
-public class Machine {
+public class Command {
     
-    final InetAddress address;
-    final int port;
-
-    public Machine(InetAddress address, int port) {
-        this.address = address;
-        this.port = port;
-    }
-
-    public InetAddress getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
+    public static final String SEND_TIME = "SEND_TIME";
+    
+    public static final String INITIALIZE = "INITIALIZE";
     
 }
