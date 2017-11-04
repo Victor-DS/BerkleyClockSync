@@ -27,66 +27,67 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import sincronizaçãorelogios.utils.Command;
 import sincronizaçãorelogios.utils.DateUtils;
+import sincronizaçãorelogios.utils.SyncUtils;
 
 /**
+ * Slave which sends
  *
  * @author Victor Santiago
  */
 public class Slave {
 
+    DatagramSocket clientSocket;
+
     public static void main(String args[]) throws Exception {
-        DatagramSocket clientSocket = new DatagramSocket();
-        byte[] sendData;
-        String time;
-        
-        initialize(clientSocket);
+        Slave slave = new Slave(9800);
+        slave.initialize();
+        slave.execute();
+    }
+
+    public Slave(int port) throws SocketException, IllegalArgumentException {
+        if (port == Config.MASTER_PORT) {
+            throw new IllegalArgumentException("Port is the same as Master's!");
+        }
+
+        clientSocket = new DatagramSocket(port);
+    }
+
+    public void initialize() throws IOException {
+        SyncUtils.initialize(clientSocket);
+    }
+
+    public void execute() throws IOException {
+        DatagramPacket sendPacket;
+        String time, command;
+        byte[] receiveData;
 
         while (true) {
-            byte[] receiveData = new byte[1024];
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, 
+            receiveData = new byte[1024];
+            DatagramPacket receivePacket = new DatagramPacket(receiveData,
                     receiveData.length);
+
+            System.out.println("Waiting for command...");
             clientSocket.receive(receivePacket);
-            String command = new String(receivePacket.getData());
-            
+            command = new String(receivePacket.getData()).trim();
+
             if (command.equals(Command.SEND_TIME)) {
                 time = DateUtils.toString(DateUtils.getRandomTime());
+
                 System.out.println("Sending " + time);
-                
-                sendData = time.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, 
-                        sendData.length, receivePacket.getAddress(), 
-                        receivePacket.getPort());
-                clientSocket.send(sendPacket);
+
+                SyncUtils.send(clientSocket, time.getBytes(), Config.MASTER_PORT);
             } else {
-                System.out.println("Adjusting clock to " + new String(receivePacket.getData()));
+                System.out.println("Adjusting clock to " + new String(receivePacket.getData()).trim());
             }
-//            clientSocket.close();
         }
     }
-    
-    /**
-     * Initializes the slave by sending a message to the Master 
-     * so it can have its address.
-     * 
-     * @param socket Server socket.
-     * @throws UnknownHostException In case the host is not found.
-     * @throws IOException In case there's a connection problem.
-     */
-    public static void initialize(DatagramSocket socket) 
-            throws UnknownHostException, IOException {
-        System.out.println("Initializing slave...");
-        
-        byte[] data = Command.INITIALIZE.getBytes();
-        
-        InetAddress IPAddress = InetAddress.getByName("localhost");
 
-        DatagramPacket sendPacket = new DatagramPacket(data, data.length, 
-                IPAddress, Config.MASTER_PORT);
-        
-        socket.send(sendPacket);
+    public void close() {
+        clientSocket.close();
     }
 
 }

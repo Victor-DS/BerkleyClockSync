@@ -23,8 +23,11 @@
  */
 package sincronizaçãorelogios;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +37,7 @@ import sincronizaçãorelogios.model.Berkley;
 import sincronizaçãorelogios.model.Machine;
 import sincronizaçãorelogios.utils.Command;
 import sincronizaçãorelogios.utils.DateUtils;
+import sincronizaçãorelogios.utils.SyncUtils;
 
 /**
  *
@@ -41,75 +45,119 @@ import sincronizaçãorelogios.utils.DateUtils;
  */
 public class Master {
     
-    final static Berkley berkley = new Berkley();
-    
-    static Map<Machine, Date> slaves;
-    
+    private final Berkley berkley;
+    private Map<Machine, Date> slaves;
+    DatagramSocket serverSocket;
+
+    private int nSlaves;
+
     public static void main(String args[]) throws Exception {
-        DatagramSocket serverSocket = new DatagramSocket(Config.MASTER_PORT);
-        byte[] receiveData = new byte[1024];
-        byte[] sendData = new byte[1024];
+        Master master = new Master(1);
+        master.execute();
+    }
+
+    public Master(int nSlaves) throws SocketException {
+        berkley = new Berkley();
+
         slaves = new HashMap<Machine, Date>() {
             @Override
             public Date get(Object key) {
                 return super.get(key) == null ? new Date() : super.get(key);
             }
-            
         };
-        
-        long nextSync = System.currentTimeMillis();
-        while (true) {
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, 
-                    receiveData.length);
-            serverSocket.receive(receivePacket);
 
-            String command = new String(receivePacket.getData());
-            if (command.equals(Command.INITIALIZE)) {
-                System.out.println("Adding slave to list...");
-                slaves.put(new Machine(receivePacket.getAddress(), 
-                        receivePacket.getPort()), new Date());
-            }
-            
+        serverSocket = new DatagramSocket(Config.MASTER_PORT);
+
+        this.nSlaves = nSlaves;
+    }
+
+    public void execute() throws IOException {
+        long nextSync = System.currentTimeMillis();
+        DatagramPacket receivePacket = null;
+        byte[] receiveData = new byte[1024];
+
+        while (true) {
+            getAllSlaves();
+
             if (System.currentTimeMillis() < nextSync) {
                 continue;
             }
-            
-            System.out.println("Time to sync...");
-            
-            sendData = Command.SEND_TIME.getBytes();
-            
-            System.out.println("Sending command to slaves...");
+
+            System.out.println("Time to sync! Sending command to slaves...");
+
             for (Machine slave : slaves.keySet()) {
-                DatagramPacket sendPacket
-                        = new DatagramPacket(sendData, sendData.length, 
-                                slave.getAddress(), slave.getPort());
-                serverSocket.send(sendPacket);
+                System.out.println("Sending to slave at port " + slave.getPort());
+                SyncUtils.send(serverSocket, Command.SEND_TIME.getBytes(), slave.getPort());
             }
-            
+
             long windowEndingTime = System.currentTimeMillis() + Config.SYNC_WINDOW;
+
+            receivePacket = new DatagramPacket(receiveData,
+                    receiveData.length);
+
+            System.out.println("Messages sent. Waiting for dates...");
+
             List<Date> times = new ArrayList<>();
+            nSlaves = slaves.size();
+            String receivedTime;
             Machine m;
-            while (System.currentTimeMillis() < windowEndingTime) {
+            while (nSlaves > 0 && System.currentTimeMillis() < windowEndingTime) {
                 serverSocket.receive(receivePacket);
-    
+
                 if (receivePacket.getData().length > 0) {
                     System.out.println("Received data from slave...");
-                    String receivedTime = new String(receivePacket.getData());
-                    m = new Machine(receivePacket.getAddress(), receivePacket.getPort());
-                    times.add(DateUtils.toDate(receivedTime));
+                    try {
+                        receivedTime = new String(receivePacket.getData()).trim();
+                        m = new Machine(receivePacket.getAddress(), receivePacket.getPort());
+                        times.add(DateUtils.toDate(receivedTime));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
+
+                nSlaves--;
             }
-            
-            Date adjustedDate;
+
+            nSlaves = 0;
+
             System.out.println("Sending adjusted dates...");
+
+            String adjustedDate;
             for (Machine slave : slaves.keySet()) {
-                adjustedDate = berkley.getNewDate(times, slaves.get(slave), new Date());
-                DatagramPacket sendPacket = new DatagramPacket(sendData, 
-                        sendData.length, slave.getAddress(), slave.getPort());
-                serverSocket.send(sendPacket);
+                adjustedDate = DateUtils.toString(berkley.getNewDate(times, slaves.get(slave), new Date()));
+                SyncUtils.send(serverSocket, adjustedDate.getBytes(), slave.getPort());
             }
-                        
+
             nextSync = System.currentTimeMillis() + Config.SYNC_INTERVAL;
+        }
+    }
+
+    /**
+     * Receives the information for the number os slaves specified and saves on the map.
+     *
+     * @throws IOException In case there's no connection.
+     */
+    private void getAllSlaves() throws IOException {
+        if (nSlaves > 0) {
+            System.out.println("Waiting for slaves...");
+        }
+
+        DatagramPacket receivePacket = null;
+        byte[] receiveData = new byte[1024];
+
+        while (nSlaves > 0) {
+            receivePacket = new DatagramPacket(receiveData,
+                    receiveData.length);
+            serverSocket.receive(receivePacket);
+
+            String command = new String(receivePacket.getData()).trim();
+            if (command.equals(Command.INITIALIZE)) {
+                System.out.println("Adding slave to list...");
+                slaves.put(new Machine(receivePacket.getAddress(),
+                        receivePacket.getPort()), new Date());
+            }
+
+            nSlaves--;
         }
     }
 
