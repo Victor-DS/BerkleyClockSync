@@ -34,7 +34,7 @@ import berklery.clock.sync.victor.santiago.utils.DateUtils;
 import berklery.clock.sync.victor.santiago.utils.SyncUtils;
 
 /**
- * Slave which sends
+ * Slave controller.
  *
  * @author Victor Santiago
  */

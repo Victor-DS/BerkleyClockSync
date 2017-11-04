@@ -42,6 +42,7 @@ import berklery.clock.sync.victor.santiago.utils.DateUtils;
 import berklery.clock.sync.victor.santiago.utils.SyncUtils;
 
 /**
+ * Master Controller.
  *
  * @author Victor Santiago
  */
