@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package berklery.clock.sync.victor.santiago;
+package berklery.clock.sync.victor.santiago.controller;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+import berklery.clock.sync.victor.santiago.utils.Config;
 import berklery.clock.sync.victor.santiago.utils.Command;
 import berklery.clock.sync.victor.santiago.utils.DateUtils;
 import berklery.clock.sync.victor.santiago.utils.SyncUtils;

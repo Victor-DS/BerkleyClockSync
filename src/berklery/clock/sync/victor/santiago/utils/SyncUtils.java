@@ -23,8 +23,6 @@
  */
 package berklery.clock.sync.victor.santiago.utils;
 
-import berklery.clock.sync.victor.santiago.Config;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

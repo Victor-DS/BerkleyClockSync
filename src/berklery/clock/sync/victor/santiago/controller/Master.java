@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package berklery.clock.sync.victor.santiago;
+package berklery.clock.sync.victor.santiago.controller;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -33,6 +33,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import berklery.clock.sync.victor.santiago.utils.Config;
 import berklery.clock.sync.victor.santiago.model.Berkley;
 import berklery.clock.sync.victor.santiago.model.Machine;
 import berklery.clock.sync.victor.santiago.utils.Command;
