@@ -81,7 +81,7 @@ public class Berkley {
     }
     
     private boolean isFailedRequest(Date slave, Date master) {
-        return DateUtils.getDifference(slave, master) > TOLERANCE;
+        return Math.abs(DateUtils.getDifference(slave, master)) > TOLERANCE;
     }
     
 }
