@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Date;
 
 import berklery.clock.sync.victor.santiago.utils.Config;
 import berklery.clock.sync.victor.santiago.utils.Command;
@@ -81,7 +82,12 @@ public class Slave {
 
                 SyncUtils.send(clientSocket, time.getBytes(), Config.MASTER_PORT);
             } else {
-                System.out.println("Adjusting clock to " + new String(receivePacket.getData()).trim());
+                String receivedDiff = new String(receivePacket.getData()).trim();
+                System.out.println("Adjusting clock with millis difference: " + receivedDiff);
+                // As requested, "setting" the clock:
+                long diff = Long.parseLong(receivedDiff);
+                long newMillis = System.currentTimeMillis() + diff;
+                Date newDate = new Date(newMillis);
             }
         }
     }

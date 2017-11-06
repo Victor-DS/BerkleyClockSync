@@ -55,7 +55,7 @@ public class Master {
     private int nSlaves;
 
     public static void main(String args[]) throws Exception {
-        Master master = new Master(1);
+        Master master = new Master(2);
         master.execute();
     }
 
@@ -74,7 +74,7 @@ public class Master {
         this.nSlaves = nSlaves;
     }
 
-    public void execute() throws IOException {
+    public void execute() throws IOException, ParseException {
         long nextSync = System.currentTimeMillis();
         DatagramPacket receivePacket = null;
         byte[] receiveData = new byte[1024];
@@ -126,9 +126,11 @@ public class Master {
             System.out.println("Sending adjusted dates...");
 
             String adjustedDate;
+            long dateDiff;
             for (Machine slave : slaves.keySet()) {
                 adjustedDate = DateUtils.toString(berkley.getNewDate(times, slaves.get(slave), new Date()));
-                SyncUtils.send(serverSocket, adjustedDate.getBytes(), slave.getPort());
+                dateDiff = DateUtils.getDifference(slaves.get(slave), DateUtils.toDate(adjustedDate));
+                SyncUtils.send(serverSocket, (dateDiff+"").getBytes(), slave.getPort());
             }
 
             nextSync = System.currentTimeMillis() + Config.SYNC_INTERVAL;
